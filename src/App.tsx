@@ -458,7 +458,7 @@ function App() {
           entry.results && entry.endpointData && (
             <div key={entry.id} className="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-8">
               <h2 className="text-xl font-bold text-slate-900 mb-4">
-                Entry #{index + 1}: VLAN {entry.endpointData.vlan} - {entry.epgName}
+                Entry #{index + 1}: {entry.epgName}
               </h2>
               <ValidationTable results={entry.results} vlan={entry.endpointData.vlan} />
             </div>
