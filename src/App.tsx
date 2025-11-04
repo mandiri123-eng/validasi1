@@ -122,7 +122,6 @@ function App() {
       return;
     }
 
-    // Extract EPG names from moquery data
     const epgsByVlan = extractEpgNamesFromMoquery(moqueryInput);
 
     setPathAttachments(parsedMoquery);
@@ -155,21 +154,23 @@ function App() {
 
       const results = validateVlanAllowances(endpointData, parsedMoquery);
 
-      // Get all EPGs from moquery for this VLAN
-      const epgList = epgsByVlan.get(vlan) || [endpoints[0]?.epg || `VLAN${vlan}`];
+      const epgList = epgsByVlan.get(vlan) || [];
 
-      // Select best matching EPG based on endpoint IP and path info
+      if (epgList.length === 0) {
+        setError(`No EPG found in moquery data for VLAN ${vlan}. Please check your moquery input.`);
+        return;
+      }
+
       const bestEpg = selectBestEpgMatch(
         endpoints[0]?.ip || '',
         epgList,
         allPaths
       );
 
-      // If only one EPG matches, use it; otherwise create entry with best match
       newEntries.push({
         id: Date.now().toString() + idx,
         endpointInput: '',
-        epgName: bestEpg || epgList[0] || `VLAN${vlan}`,
+        epgName: bestEpg || epgList[0],
         results,
         endpointData
       });
@@ -316,7 +317,7 @@ function App() {
               />
               <p className="text-xs text-slate-600 mt-2">
                 {entryMode === 'auto' ? (
-                  <span className="font-medium text-green-700">Auto mode: EPG names will be extracted automatically from this data</span>
+                  <span className="font-medium text-green-700">Auto mode: Paste moquery data for ALL VLANs you want to validate. EPG names will be extracted automatically.</span>
                 ) : (
                   <span>This data provides VLAN-to-path mappings for validation</span>
                 )}

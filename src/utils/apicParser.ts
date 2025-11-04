@@ -184,38 +184,37 @@ export function extractEpgNamesFromMoquery(input: string): Map<string, string[]>
     if (!line.trim()) continue;
 
     const epgMatch = line.match(/\/epg-([^\/]+)\//);
-    if (epgMatch) {
-      const epgRaw = epgMatch[1];
+    if (!epgMatch) continue;
 
-      let vlan = '';
+    const epgRaw = epgMatch[1];
+    let vlan = '';
 
-      const vlanInLineMatch = line.match(/vlan-(\d+)/i);
-      if (vlanInLineMatch) {
-        vlan = vlanInLineMatch[1];
+    const vlanInLineMatch = line.match(/vlan-(\d+)/i);
+    if (vlanInLineMatch) {
+      vlan = vlanInLineMatch[1];
+    }
+
+    if (!vlan) {
+      const epgVlanMatch = epgRaw.match(/VLAN(\d+)/i);
+      if (epgVlanMatch) {
+        vlan = epgVlanMatch[1];
       }
+    }
 
-      if (!vlan) {
-        const epgVlanMatch = epgRaw.match(/VLAN(\d+)/i);
-        if (epgVlanMatch) {
-          vlan = epgVlanMatch[1];
-        }
+    if (!vlan) {
+      const epgVlanMatch = epgRaw.match(/(\d{3})/);
+      if (epgVlanMatch) {
+        vlan = epgVlanMatch[1];
       }
+    }
 
-      if (!vlan) {
-        const epgVlanMatch = epgRaw.match(/(\d{3})/);
-        if (epgVlanMatch) {
-          vlan = epgVlanMatch[1];
-        }
+    if (vlan && epgRaw) {
+      if (!epgsByVlan.has(vlan)) {
+        epgsByVlan.set(vlan, []);
       }
-
-      if (vlan && epgRaw) {
-        if (!epgsByVlan.has(vlan)) {
-          epgsByVlan.set(vlan, []);
-        }
-        const epgList = epgsByVlan.get(vlan)!;
-        if (!epgList.includes(epgRaw)) {
-          epgList.push(epgRaw);
-        }
+      const epgList = epgsByVlan.get(vlan)!;
+      if (!epgList.includes(epgRaw)) {
+        epgList.push(epgRaw);
       }
     }
   }
